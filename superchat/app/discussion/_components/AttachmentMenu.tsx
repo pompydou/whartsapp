@@ -6,6 +6,7 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onSelect: (type: 'camera' | 'library' | 'document' | 'location' | 'contact') => void;
+  disabled?: boolean;
 }
 
 const MENU_ITEMS = [
@@ -16,7 +17,7 @@ const MENU_ITEMS = [
   { id: 'contact',  label: 'Contact',         icon: 'person-outline',   color: '#007AFF' },
 ];
 
-export default function AttachmentMenu({ visible, onClose, onSelect }: Props) {
+export default function AttachmentMenu({ visible, onClose, onSelect, disabled = false }: Props) {
   return (
     <Modal
       visible={visible}
@@ -26,22 +27,24 @@ export default function AttachmentMenu({ visible, onClose, onSelect }: Props) {
     >
       <Pressable style={styles.overlay} onPress={onClose}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
-        
+
         <View style={styles.container}>
           <View style={styles.menu}>
             {MENU_ITEMS.map((item, index) => (
               <View key={item.id}>
                 <TouchableOpacity
-                  style={styles.item}
+                  style={[styles.item, disabled && styles.itemDisabled]}
                   activeOpacity={0.7}
+                  disabled={disabled}
                   onPress={() => {
+                    if (disabled) return;
                     onClose();
                     onSelect(item.id as any);
                   }}
                 >
-                  <Text style={styles.label}>{item.label}</Text>
-                  <View style={[styles.iconCircle, { backgroundColor: item.color }]}>
-                    <Ionicons name={item.icon as any} size={22} color="white" />
+                  <Text style={[styles.label, disabled && styles.labelDisabled]}>{item.label}</Text>
+                  <View style={[styles.iconCircle, { backgroundColor: disabled ? '#CCC' : item.color }]}>
+                    <Ionicons name={item.icon as any} size={22} color={disabled ? '#999' : 'white'} />
                   </View>
                 </TouchableOpacity>
                 {index < MENU_ITEMS.length - 1 && <View style={styles.divider} />}
@@ -80,9 +83,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
+  itemDisabled: {
+    opacity: 0.5,
+  },
   label: {
     fontSize: 17,
     color: '#000',
+  },
+  labelDisabled: {
+    color: '#999',
   },
   iconCircle: {
     width: 36,

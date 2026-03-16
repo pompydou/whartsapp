@@ -126,16 +126,32 @@ export default function VerifyPhoneScreen() {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.resendButton}>
-          <Text style={styles.resendText}>Renvoyer le code</Text>
+        <TouchableOpacity 
+          style={[styles.resendButton, resending && styles.resendButtonDisabled]}
+          onPress={handleResendCode}
+          disabled={resending}
+        >
+          {resending ? (
+            <ActivityIndicator size="small" color="#0088CC" />
+          ) : (
+            <Text style={styles.resendText}>Renvoyer le code</Text>
+          )}
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.submitButton, isCodeComplete && styles.submitButtonActive]}
-          disabled={!isCodeComplete}
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
+        <TouchableOpacity
+          style={[styles.submitButton, isCodeComplete && styles.submitButtonActive, loading && styles.submitButtonLoading]}
+          disabled={!isCodeComplete || loading}
           onPress={handleVerify}
         >
-          <Text style={styles.submitButtonText}>Vérifier</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.submitButtonText}>Vérifier</Text>
+          )}
         </TouchableOpacity>
       </View>
           </View>
@@ -232,10 +248,20 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 32,
   },
+  resendButtonDisabled: {
+    opacity: 0.5,
+  },
   resendText: {
     fontSize: 14,
     color: '#0088CC',
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   submitButton: {
     height: 52,
@@ -246,6 +272,9 @@ const styles = StyleSheet.create({
   },
   submitButtonActive: {
     backgroundColor: '#25D366',
+  },
+  submitButtonLoading: {
+    opacity: 0.7,
   },
   submitButtonText: {
     color: 'white',

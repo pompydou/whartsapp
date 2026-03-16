@@ -75,7 +75,7 @@ const sendMessage = async (req, res) => {
     d.sent    = false;
     await d.save();
 
-    const newMsg = d.messages[d.messages.length - 1];
+    const newMsg = d.messages[d.messages.length - 1].toObject();
     const io = req.app.get('io');
     if (io) io.emit('new_message', { discussion: { ...d.toObject(), id: d._id }, message: newMsg });
 

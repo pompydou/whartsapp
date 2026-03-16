@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View, Platform, Image } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 
@@ -43,13 +43,13 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
     return acc;
   }, {} as Record<string, number>) || {};
 
-  // Gestion du long press pour le menu contextuel
+  // Gestion du long press
   const handleLongPress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setMenuVisible(true);
   };
 
-  // Items du menu contextuel
+  // Items du menu
   const menuItems = [
     { label: 'Répondre', icon: 'reply-outline', action: () => onReply(msg), danger: false },
     { label: 'Modifier', icon: 'create-outline', action: () => onEdit(msg._id, msg.content), danger: false },
@@ -66,7 +66,7 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
         style={[styles.row, isMe ? styles.rowMe : styles.rowThem]}
       >
         <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem, msg.deleted && styles.bubbleDeleted]}>
-          {/* Aperçu du message auquel on répond */}
+          {/* Aperçu du message de réponse */}
           {repliedMsg && !msg.deleted && (
             <TouchableOpacity
               activeOpacity={0.7}
@@ -89,14 +89,14 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
             <Text style={styles.deletedText}>🚫 Ce message a été supprimé</Text>
           ) : (
             <>
-              {/* Affichage pour les images */}
+              {/* Image */}
               {msg.type === 'image' && msg.mediaUri && (
                 <View style={[styles.imageContainer, isMe ? styles.imageContainerMe : styles.imageContainerThem]}>
                   <Image source={{ uri: msg.mediaUri }} style={styles.messageImage} resizeMode="cover" />
                 </View>
               )}
 
-              {/* Affichage pour les fichiers */}
+              {/* Fichier */}
               {msg.type === 'file' && (
                 <View style={[styles.fileContainer, isMe ? styles.fileContainerMe : styles.fileContainerThem]}>
                   <Ionicons name="document-outline" size={32} color={isMe ? 'white' : '#007AFF'} />
@@ -104,11 +104,12 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
                 </View>
               )}
 
-              {/* Affichage pour le texte */}
+              {/* Texte */}
               {msg.type === 'text' && (
                 <Text style={[styles.text, isMe ? styles.textMe : styles.textThem]}>{msg.content}</Text>
               )}
 
+              {/* Métadonnées */}
               <View style={styles.meta}>
                 {msg.edited && <Text style={[styles.editedLabel, isMe && styles.editedLabelMe]}>modifié</Text>}
                 <Text style={[styles.time, isMe && styles.timeMe]}>{time}</Text>
@@ -142,7 +143,7 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
         )}
       </TouchableOpacity>
 
-      {/* Menu contextuel iOS Style */}
+      {/* Menu contextuel iOS */}
       <Modal
         visible={menuVisible}
         transparent
@@ -168,12 +169,12 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
               ))}
             </View>
 
-            {/* Bulle rappel du message */}
+            {/* Rappel du message */}
             <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem, { marginBottom: 12, opacity: 0.95 }]}>
-               <Text style={[styles.text, isMe ? styles.textMe : styles.textThem]}>{msg.content}</Text>
+               <Text style={[styles.text, isMe ? styles.textMe : styles.textThem]} numberOfLines={2}>{msg.content}</Text>
             </View>
 
-            {/* Liste d'actions */}
+            {/* Actions */}
             <View style={styles.contextMenu}>
               {menuItems.map((item, idx) => (
                 <View key={item.label}>
@@ -200,73 +201,81 @@ export default function MessageBubble({ msg, isMe, repliedMsg, onDelete, onEdit,
 }
 
 const styles = StyleSheet.create({
-  row: { marginVertical: 3, flexDirection: 'column' },
+  row: { marginVertical: 2, flexDirection: 'column' },
   rowMe:   { alignItems: 'flex-end' },
   rowThem: { alignItems: 'flex-start' },
 
   bubble: {
-    maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1, shadowRadius: 3, elevation: 1,
+    maxWidth: '75%',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 1,
   },
-  bubbleMe:      { backgroundColor: '#25D366', borderBottomRightRadius: 4 },
-  bubbleThem:    { backgroundColor: 'white',   borderBottomLeftRadius: 4 },
-  bubbleDeleted: { backgroundColor: '#F0F0F5', borderWidth: 1, borderColor: '#E0E0E0' },
+  bubbleMe: {
+    backgroundColor: '#DCF8C6',
+    borderBottomRightRadius: 4,
+  },
+  bubbleThem: {
+    backgroundColor: 'white',
+    borderBottomLeftRadius: 4,
+  },
+  bubbleDeleted: {
+    backgroundColor: '#F0F0F5',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
 
   deletedText: { fontSize: 14, color: '#AAAAAA', fontStyle: 'italic' },
-  text:   { fontSize: 16, lineHeight: 22 },
-  textMe:   { color: 'white' },
-  textThem: { color: '#0D0D0D' },
+  text: { fontSize: 15.5, lineHeight: 21, color: '#111' },
+  textMe: { color: '#111' },
+  textThem: { color: '#111' },
 
-  meta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: 4, gap: 4 },
-  editedLabel:   { fontSize: 10, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' },
-  editedLabelMe: { color: 'rgba(255,255,255,0.6)' },
-  time:   { fontSize: 11, color: '#8E8E93' },
-  timeMe: { color: 'rgba(255,255,255,0.7)' },
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 4,
+    gap: 3,
+  },
+  editedLabel: { fontSize: 10, color: 'rgba(0,0,0,0.4)', fontStyle: 'italic' },
+  editedLabelMe: { color: 'rgba(0,0,0,0.4)' },
+  time: { fontSize: 11, color: 'rgba(0,0,0,0.45)' },
+  timeMe: { color: 'rgba(0,0,0,0.45)' },
 
-  reactions:    { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: -6, marginBottom: 4 },
-  reactionsMe:  { justifyContent: 'flex-end', marginRight: 10 },
-  reactionsThem:{ justifyContent: 'flex-start', marginLeft: 10 },
+  // Réactions
+  reactions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: -4,
+    marginBottom: 2,
+  },
+  reactionsMe: { justifyContent: 'flex-end', marginRight: 8 },
+  reactionsThem: { justifyContent: 'flex-start', marginLeft: 8 },
   reactionPill: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'white', borderRadius: 14,
-    paddingHorizontal: 8, paddingVertical: 4,
-    borderWidth: 1, borderColor: '#EFEFEF',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1, shadowRadius: 2, elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: '#E8E8EE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
   },
   reactionEmoji: { fontSize: 14 },
-  reactionCount: { fontSize: 11, color: '#666', marginLeft: 4, fontWeight: '700' },
+  reactionCount: { fontSize: 11, color: '#555', marginLeft: 3, fontWeight: '600' },
 
-  overlay: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
-  menuContainer: { width: '100%', alignItems: 'center' },
-
-  quickEmojisContainer: {
-    flexDirection: 'row', backgroundColor: 'white',
-    borderRadius: 30, paddingHorizontal: 12, paddingVertical: 8,
-    marginBottom: 12, gap: 8,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15, shadowRadius: 10, elevation: 5,
-  },
-  quickEmojiBtn: { padding: 4 },
-  quickEmoji: { fontSize: 28 },
-
-  contextMenu: {
-    backgroundColor: 'white', borderRadius: 14,
-    width: 250, overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2, shadowRadius: 20, elevation: 15,
-  },
-  menuItem: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 14
-  },
-  menuLabel: { fontSize: 17, color: '#000', fontWeight: '400' },
-  menuLabelDanger: { color: '#FF3B30' },
-  menuDivider: { height: StyleSheet.hairlineWidth, backgroundColor: '#DDD', marginHorizontal: 0 },
-
-  // Styles pour la réponse (Reply)
+  // Reply
   replyContainer: {
     flexDirection: 'row',
     borderRadius: 8,
@@ -274,52 +283,26 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     overflow: 'hidden',
   },
-  replyContainerMe: {
-    backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  replyContainerThem: {
-    backgroundColor: '#F5F5F5',
-  },
-  replyAccent: {
-    width: 4,
-    borderRadius: 2,
-    marginRight: 8,
-  },
-  replyContent: {
-    flex: 1,
-  },
-  replySender: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  replyText: {
-    fontSize: 13,
-    color: '#666',
-  },
-  replyTextMe: {
-    color: 'rgba(255,255,255,0.8)',
-  },
+  replyContainerMe: { backgroundColor: 'rgba(0,0,0,0.08)' },
+  replyContainerThem: { backgroundColor: '#F5F5F5' },
+  replyAccent: { width: 3, borderRadius: 2, marginRight: 8 },
+  replyContent: { flex: 1 },
+  replySender: { fontSize: 13, fontWeight: '700', marginBottom: 2 },
+  replyText: { fontSize: 13, color: '#666' },
+  replyTextMe: { color: 'rgba(0,0,0,0.7)' },
 
-  // Styles pour les images
+  // Image
   imageContainer: {
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 6,
-    maxWidth: 260,
+    maxWidth: 240,
   },
-  imageContainerMe: {
-    alignSelf: 'flex-end',
-  },
-  imageContainerThem: {
-    alignSelf: 'flex-start',
-  },
-  messageImage: {
-    width: 260,
-    height: 200,
-  },
+  imageContainerMe: { alignSelf: 'flex-end' },
+  imageContainerThem: { alignSelf: 'flex-start' },
+  messageImage: { width: 240, height: 180 },
 
-  // Styles pour les fichiers
+  // Fichier
   fileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -327,21 +310,51 @@ const styles = StyleSheet.create({
     padding: 10,
     gap: 10,
     marginBottom: 6,
-    minWidth: 200,
+    minWidth: 180,
   },
-  fileContainerMe: {
-    backgroundColor: 'rgba(0,0,0,0.1)',
+  fileContainerMe: { backgroundColor: 'rgba(0,0,0,0.08)' },
+  fileContainerThem: { backgroundColor: '#F5F5F5' },
+  fileName: { fontSize: 14, fontWeight: '600', color: '#007AFF', flex: 1 },
+  fileNameMe: { color: '#007AFF' },
+
+  // Menu
+  overlay: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
+  menuContainer: { width: '100%', alignItems: 'center' },
+  quickEmojisContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderRadius: 30,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 12,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  fileContainerThem: {
-    backgroundColor: '#F5F5F5',
+  quickEmojiBtn: { padding: 4 },
+  quickEmoji: { fontSize: 28 },
+  contextMenu: {
+    backgroundColor: 'white',
+    borderRadius: 14,
+    width: 250,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 15,
   },
-  fileName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#007AFF',
-    flex: 1,
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  fileNameMe: {
-    color: 'white',
-  },
+  menuLabel: { fontSize: 17, color: '#000', fontWeight: '400' },
+  menuLabelDanger: { color: '#FF3B30' },
+  menuDivider: { height: StyleSheet.hairlineWidth, backgroundColor: '#DDD', marginHorizontal: 0 },
 });

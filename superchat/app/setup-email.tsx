@@ -1,18 +1,41 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ImageBackground, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SetupEmailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { updateEmail } = useAuth();
+  
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleContinue = () => {
-    if (email.trim()) {
+  const handleContinue = async () => {
+    if (!email.trim()) {
       router.push('/(tabs)/discussions');
+      return;
     }
+    
+    setLoading(true);
+    setError(null);
+    
+    const result = await updateEmail(email);
+    
+    if (result.success) {
+      router.push('/(tabs)/discussions');
+    } else {
+      setError(result.error || 'Erreur lors de la configuration de l\'email');
+    }
+    
+    setLoading(false);
+  };
+
+  const handleSkip = () => {
+    router.push('/(tabs)/discussions');
   };
 
   const isEmailValid = email.trim() && email.includes('@');
@@ -69,17 +92,29 @@ export default function SetupEmailScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.submitButton, isEmailValid && styles.submitButtonActive]}
-          disabled={!isEmailValid}
-          onPress={handleContinue}
-        >
-          <Text style={styles.submitButtonText}>Continuer</Text>
-        </TouchableOpacity>
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
 
-        <TouchableOpacity 
+        {loading ? (
+          <View style={[styles.submitButton, styles.submitButtonActive]}>
+            <ActivityIndicator size="small" color="white" />
+            <Text style={styles.submitButtonText}>Enregistrement...</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.submitButton, isEmailValid && styles.submitButtonActive]}
+            disabled={!isEmailValid || loading}
+            onPress={handleContinue}
+          >
+            <Text style={styles.submitButtonText}>Continuer</Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity
           style={styles.skipButton}
-          onPress={() => router.push('/(tabs)/discussions')}
+          onPress={handleSkip}
+          disabled={loading}
         >
           <Text style={styles.skipButtonText}>Ignorer pour le moment</Text>
         </TouchableOpacity>
@@ -180,6 +215,13 @@ const styles = StyleSheet.create({
     color: '#0088CC',
     marginLeft: 12,
     lineHeight: 18,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   submitButton: {
     height: 52,

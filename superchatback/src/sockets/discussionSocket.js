@@ -18,10 +18,10 @@ const discussionSocket = (io) => {
         const d = await Discussion.findById(discussionId);
         if (!d) return socket.emit('error', { message: 'Discussion non trouvée' });
 
-        d.messages.push({ 
-          sender, 
-          content: preview, 
-          type: type || 'text', 
+        d.messages.push({
+          sender,
+          content: preview,
+          type: type || 'text',
           replyTo: replyTo || null,
           mediaUri: mediaUri || null,
         });
@@ -31,8 +31,10 @@ const discussionSocket = (io) => {
         d.sent    = true;
         await d.save();
 
-        const newMsg = d.messages[d.messages.length - 1];
-        const disc   = { ...d.toObject(), id: d._id.toString() };
+        // Convertir en objet simple pour éviter les références circulaires
+        const newMsg = d.messages[d.messages.length - 1].toObject();
+        const disc   = d.toObject();
+        disc.id = d._id.toString();
 
         socket.emit('message_sent', { discussion: disc, message: newMsg });
         // Envoyer new_message uniquement aux autres membres de la room, pas au sender
